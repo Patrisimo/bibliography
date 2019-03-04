@@ -10,23 +10,23 @@ function selectDocType() {
     var dropdown = document.getElementById('bibtype');
     var changeTo = dropdown.options[dropdown.selectedIndex].value;
     document.getElementById(changeTo).style.display = 'block';
-    document.getElementById(curBib).style.display = 'none';
+    if (curBib != changeTo) 
+      document.getElementById(curBib).style.display = 'none';
     curBib = changeTo;
 }
 window.onload = function () {
     document.getElementById('bibtype').addEventListener('change',selectDocType);
+    selectDocType()
 }
 
 function unDoc() {
     
     var formvals = document.getElementById('undoc_form').elements;
-    var body = formvals[0].value;
-    var title = formvals[1].value;
-    var month = formvals[2].value; 
-    var day = formvals[3].value;
-    var year = formvals[4].value;
-    var doc_number = formvals[5].value;
-    var url = formvals[6].value;
+    var body = formvals.namedItem("body").value;
+    var title = formvals.namedItem("title").value;
+    var year = formvals.namedItem("year").value;
+    var doc_number = formvals.namedItem("docid").value;
+    var url = formvals.namedItem("link").value;
     
     // First we validate
     var error_msg = '';
@@ -42,9 +42,8 @@ function unDoc() {
         error_msg += 'Error: Document title missing\n';
         error_level = Math.max(error_level, 2);
     }
-    // The month is not necessary, but must be between 1 and 12
-    var result = validate_date(month, day, year);
-    var datestring = result['datestring'];
+    // The month and day are currently not expected
+    var result = validate_date('', '', year);
     var yearstring = result['yearstring'];
     day = result['day'];
     month = result['month'];
@@ -79,12 +78,16 @@ function unDoc() {
     }
     
     var bib_entry = [];
-    bib_entry['text'] = 'United Nations, ' + body + yearstring + (url.length > 0? '. <a href="' + url + '">':'') + title + (url.length >0?'</a>.':'.') + datestring + (doc_number.length > 0 ? ' ' + doc_number + "." : '');
+    bib_entry['text'] = 'United Nations, ' + body + yearstring + (url.length > 0? '. <a href="' + url + '">':'') + title + (url.length >0?'</a>.':'.') + (doc_number.length > 0 ? ' ' + doc_number + "." : '');
 
     bib_entry['body'] = body;
-    bib_entry['day'] = day;
-    bib_entry['month'] = month;
     bib_entry['year'] = year;
+
+    bib_entry['title'] = title;
+    bib_entry['doc_number'] = doc_number;
+    bib_entry['url'] = url;
+    bib_entry['type'] = 'un';
+    
     
     addUNDocument(bib_entry);
     update();
@@ -101,8 +104,7 @@ function periodical() {
     var year = formvals.namedItem('year').value;
     var url = formvals.namedItem('link').value;
     var publication = formvals.namedItem('publication').value;
-    var volinfo = formvals.namedItem('volinfo').value;
-    var pages = formvals.namedItem('pages').value;
+    var isSeason = formvals.namedItem('season').value;
     
     var authors = [];
     for (var i=1;i<=author_p;i++) {
@@ -121,7 +123,6 @@ function periodical() {
     }
     // The month is not necessary, but must be between 1 and 12
     var result = validate_date(month, day, year);
-    var datestring = result['datestring'];
     var yearstring = result['yearstring'];
     day = result['day'];
     month = result['month'];
@@ -130,9 +131,8 @@ function periodical() {
     error_msg += result['error_msg'];
     error_level = Math.max(error_level, result['error_level']);
     
-    result = validate_publication(publication, volinfo, pages, true); // make this
+    result = validate_publication(publication, true); // make this
     var pubstring = result['pubstring'];
-    var pagestring = result['pagestring'];
     error_msg += result['error_msg'];
     error_level = Math.max(error_level, result['error_level']);
     
@@ -142,7 +142,12 @@ function periodical() {
     error_msg += result['error_msg'];
     error_level = Math.max(error_level, result['error_level']);
     
-    var titlestring = '<a href="' + url + '">' + title + '</a>';
+    var titlestring;
+    if (url.length > 0) {
+      titlestring = '<a href="' + url + '">' + title + '</a>';
+    } else {
+      titlestring = title
+    }
     
     result = validate_authors(authors, titlestring); // make this
     autstring = result['autstring'];
@@ -167,16 +172,25 @@ function periodical() {
     }
     
     var bib_entry = [];
-    bib_entry['text'] = autstring + yearstring + (titlestring.length > 0? '. ':'') + titlestring + '.' + pubstring + datestring + pagestring;
+    bib_entry['text'] = autstring + yearstring + (titlestring.length > 0? '. ':'') + titlestring + '.' + pubstring;
 
     bib_entry['body'] = autstring;
     bib_entry['day'] = day;
     bib_entry['month'] = month;
     bib_entry['year'] = year;
     
+    bib_entry['title'] = title;
+    bib_entry['link'] = url;
+    bib_entry['publication'] = publication;
+    bib_entry['isSeason'] = isSeason;
+    bib_entry['type'] = 'periodical';
+    bib_entry['authors'] = authors
+    
+    
     addNonUNDocument(bib_entry);
     update();
     resetAuthors();
+    resetSeason();
     document.getElementById('periodical_form').reset()
 }
 
@@ -237,6 +251,10 @@ function treaty() {
     bib_entry['month'] = 1;
     bib_entry['year'] = year;
     
+    bib_entry['title'] = title;
+    bib_entry['url'] = url;
+    bib_entry['type'] = 'treaty'
+    
     addNonUNDocument(bib_entry);
     update();
     resetAuthors();
@@ -251,9 +269,6 @@ function other() {
     var day = formvals.namedItem('day').value;
     var year = formvals.namedItem('year').value;
     var url = formvals.namedItem('link').value;
-    var publication = formvals.namedItem('publication').value;
-    var volinfo = '';
-    var pages = '';
     var organization = formvals.namedItem('organization').value;
     
     var authors = [];
@@ -273,18 +288,12 @@ function other() {
     }
     // The month is not necessary, but must be between 1 and 12
     var result = validate_date(month, day, year);
-    var datestring = result['datestring'];
+
     var yearstring = result['yearstring'];
     day = result['day'];
     month = result['month'];
     year = result['year'];
     
-    error_msg += result['error_msg'];
-    error_level = Math.max(error_level, result['error_level']);
-    
-    result = validate_publication(publication, volinfo, pages, false); // make this
-    var pubstring = result['pubstring'];
-    var pagestring = result['pagestring']
     error_msg += result['error_msg'];
     error_level = Math.max(error_level, result['error_level']);
     
@@ -323,12 +332,15 @@ function other() {
     }
     
     var bib_entry = [];
-    bib_entry['text'] = autstring + yearstring + (titlestring.length > 0? '. ':'') + titlestring + '.' + pubstring + datestring + pagestring;
+    bib_entry['text'] = autstring + yearstring + (titlestring.length > 0? '. ':'') + titlestring + '.';
 
     bib_entry['body'] = autstring;
     bib_entry['day'] = day;
     bib_entry['month'] = month;
     bib_entry['year'] = year;
+    bib_entry['authors'] = authors;
+    bib_entry['organization'] = organization;
+    bib_entry['type'] = 'other';
     
     addNonUNDocument(bib_entry);
     update();
@@ -392,26 +404,32 @@ function validate_date(month, day, year) {
     var datestring = '';
     var yearstring = '';
     var valid_months = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
+    var valid_seasons = ['Spring', 'Summer', 'Fall', 'Winter']
     var valid_month = false;
     var valid_day = false;
     
     if (month.length > 0) {
         var month_id = parseInt(month);
         if (isNaN(month)) {
-            var isValid = false;
-            for (var i = 0; i < valid_months.length; i++) {
-                if (valid_months[i].toLowerCase() === month.toLowerCase()) {
-                    isValid = true;
-                    month = valid_months[i];
-                    month_id = i;
-                    valid_month = true;
-                    break;
-                }
-            }
-            if (!isValid) {
-                error_msg += 'Error: Invalid month - ' + month + '.\n';
-                error_level = Math.max(error_level, 2);
-                    
+            if (valid_seasons.includes(month)) {
+              valid_month = true
+              day = ''
+            } else {
+              var isValid = false;
+              for (var i = 0; i < valid_months.length; i++) {
+                  if (valid_months[i].toLowerCase() === month.toLowerCase()) {
+                      isValid = true;
+                      month = valid_months[i];
+                      month_id = i;
+                      valid_month = true;
+                      break;
+                  }
+              }
+              if (!isValid) {
+                  error_msg += 'Error: Invalid month - ' + month + '.\n';
+                  error_level = Math.max(error_level, 2);
+                      
+              }
             }
             
         } else {
@@ -438,7 +456,7 @@ function validate_date(month, day, year) {
     }
     
     if (valid_month) {
-        datestring = ' ' + day + (isNaN(day)?'':' ') + month + '.';
+        datestring = day + (isNaN(day)?'':' ') + month + ' ';
     }
     
     if (year.length > 0) {
@@ -449,13 +467,12 @@ function validate_date(month, day, year) {
         } else {
             year = year_id;
             
-            yearstring = ' (' + year + ')';
+            yearstring = ' (' + datestring + year + ')';
 
         }
         
     }
     var result = [];
-    result['datestring'] = datestring;
     result['yearstring'] = yearstring;
     result['year'] = year;
     result['month'] = month_id;
@@ -466,28 +483,16 @@ function validate_date(month, day, year) {
     
 }
 
-function validate_publication(publication, volinfo, pages, italicize) {
-    var error_msg = '', error_level = 0, pubstring = '', pagestring = '';
-    if ( (volinfo.length > 0 || pages.length > 0) && publication.length == 0) {
-        error_msg += 'Error: Volume and/or page information given without publication.\n';
-        error_level = 2;
-    } else {
-        if (publication.length > 0) {
-            pubstring = ' ' +  (italicize?'<i>':'') + publication + (italicize?'</i>':'');
-            if (volinfo.length > 0) {
-                pubstring += ', ' + volinfo + (volinfo.charAt(volinfo.length-1) === '.'? '':'.');
-            } else {
-                pubstring += '.';
-            }
-            if (pages.length >0) {
-                pagestring += ' ' + pages + (pages.charAt(pages.length-1) === '.'?'':'.');
-            }
-        }
+function validate_publication(publication, italicize) {
+    var error_msg = '', error_level = 0, pubstring = '';
+
+    if (publication.length > 0) {
+        pubstring = ' ' +  (italicize?'<i>':'') + publication + (italicize?'</i>':'') + '.';
     }
+    
     
     var result = [];
     result['pubstring'] = pubstring;
-    result['pagestring'] = pagestring;
     result['error_msg'] = error_msg;
     result['error_level'] = error_level;
     return result;
@@ -514,8 +519,10 @@ function addAuthorP() {
     var row = table.insertRow(author_p++);
     var label = row.insertCell(0);
     var input = row.insertCell(1);
+    var del = row.insertCell(2);    
     label.innerHTML = 'Author ' + author_p + ':';
     input.innerHTML = "<input type='text' name='firstname" + author_p + "' placeholder='First'> <input type='text' name='lastname" + author_p + "' placeholder='Last'>";
+    del.innerHTML = "<input type='button' value='Remove' onclick=removeAuthorP("+(author_o-1)+")>"
 }
 
 function addAuthorO() {
@@ -523,8 +530,32 @@ function addAuthorO() {
     var row = table.insertRow(author_o++);
     var label = row.insertCell(0);
     var input = row.insertCell(1);
+    var del = row.insertCell(2);
     label.innerHTML = 'Author ' + author_o + ':';
     input.innerHTML = "<input type='text' name='firstname" + author_o + "' placeholder='First'> <input type='text' name='lastname" + author_o + "' placeholder='Last'>";
+    del.innerHTML = "<input type='button' value='Remove' onclick=removeAuthorO("+(author_o-1)+")>"
+}
+function removeAuthorP(i) {
+  var table = document.getElementById('periodical_table');
+  table.deleteRow(i);
+  author_o--;
+  for (var j=i;j<author_p;j++) {
+    table.rows[j].cells[0].innerHTML = 'Author ' + (j+1) + ':';
+    table.rows[j].cells[1].children[0].name = 'firstname' + (j+1);
+    table.rows[j].cells[1].children[1].name = 'lastname' + (j+1);
+    table.rows[j].cells[2].innerHTML = "<input type='button' value='Remove' onclick=removeAuthorP("+j+")>"
+  }
+}
+function removeAuthorO(i) {
+  var table = document.getElementById('other_table');
+  table.deleteRow(i);
+  author_o--;
+  for (var j=i;j<author_o;j++) {
+    table.rows[j].cells[0].innerHTML = 'Author ' + (j+1) + ':';
+    table.rows[j].cells[1].children[0].name = 'firstname' + (j+1);
+    table.rows[j].cells[1].children[1].name = 'lastname' + (j+1);
+    table.rows[j].cells[2].innerHTML = "<input type='button' value='Remove' onclick=removeAuthorO("+j+")>"
+  }
 }
 
 function resetAuthors() {
@@ -586,15 +617,173 @@ function addNonUNDocument(bib_entry) {
     other_documents.splice(i, 0, bib_entry);
 }
 
+function addMonthDay() {
+  
+  
+}
+
+function switchSeasonP() {
+  formvals = document.getElementById("periodical_form").elements
+  formvals.namedItem("day").type = "hidden";
+  formvals.namedItem("month").size=6;
+  formvals.namedItem("month").maxLength=6;
+  formvals.namedItem("month").placeholder="Season";
+  formvals.namedItem("season").value=true;
+  formvals.namedItem("switch").value="Use date instead of season";
+  formvals.namedItem("switch").onclick=resetSeason;
+}
+
+function resetSeason() {
+  formvals = document.getElementById("periodical_form").elements
+  formvals.namedItem("day").type = "text";
+  formvals.namedItem("month").size=2;
+  formvals.namedItem("month").maxLength=2;
+  formvals.namedItem("month").placeholder="MM";
+  formvals.namedItem("season").value=false;
+  formvals.namedItem("switch").value="Use season instead of date";  
+  formvals.namedItem("switch").onclick=switchSeasonP;
+}
+
+function edit() {
+  document.getElementById("editbutton").value='Switch to view mode';
+  document.getElementById("editbutton").onclick=unedit;
+  document.getElementById("currentlyEditing").value="true";
+  updateEdit();
+}
+
+function updateEdit() {
+  var bibTable = document.createElement("TABLE");
+  document.getElementById('output').innerHTML = 'Bibliography<br><br>';  
+  
+  for (var i=0; i < other_documents.length; i++) {
+      row = bibTable.insertRow(-1);
+      td = row.insertCell(0);
+      td.innerHTML="<input type='button', value='Delete', onclick='deleteOther("+i+")'>";
+      td = row.insertCell(1);
+      td.innerHTML="<input type='button', value='Edit', onclick='editOther("+i+")'>"
+      td = row.insertCell(2);
+      td.innerHTML=other_documents[i]['text']
+  }
+  document.getElementById('output').appendChild(bibTable)
+  document.getElementById('output').innerHTML += 'United Nations Documents:<br><br>';
+  bibTable = document.createElement("TABLE");
+  for (var i=0; i<un_documents.length; i++) {
+      row = bibTable.insertRow(-1);
+      td = row.insertCell(0);
+      td.innerHTML="<input type='button', value='Delete', onclick='deleteUN("+i+")'>";
+      td = row.insertCell(1);
+      td.innerHTML="<input type='button', value='Edit', onclick='editUN("+i+")'>"
+      td = row.insertCell(2);
+      td.innerHTML=un_documents[i]['text']
+  }
+  document.getElementById('output').appendChild(bibTable)
+  
+}
+
+function deleteOther(i) {
+  other_documents.splice(i,1);
+  updateEdit();
+}
+function deleteUN(i) {
+  un_documents.splice(i,1);
+  updateEdit();
+}
+
+function editOther(i) {
+  loadDoc(other_documents.splice(i,1));
+}
+function editUN(i) {
+  alert('Called editUN('+i)
+  loadDoc(un_documents[i]);
+  un_documents.splice(i,1)
+}
+
+function loadDoc(doc) {
+  alert('Called loadDoc('+doc)
+  var dropdown = document.getElementById('bibtype');
+  
+  if (doc['type'] == 'un') {
+    dropdown.selectedIndex = 0;
+    selectDocType();
+    formvals = document.getElementById('undoc_form').elements;
+    formvals.namedItem("body").value = doc['body'];
+    formvals.namedItem("title").value = doc['title'];
+    formvals.namedItem("year").value = doc['year'];
+    formvals.namedItem("docid").value = doc['doc_number'];
+    formvals.namedItem("link").value = doc['url'];
+  } else if (doc['type'] == 'periodical') {
+    dropdown.selectedIndex = 1;
+    selectDocType();
+    formvals = document.getElementById('periodical_form').elements;
+
+    if (doc["isSeason"] && ! formvals.namedItem("season")) {
+      switchSeasonP();
+    } else if (!doc["isSeason"] && formvals.namedItem("season")) {
+      resetSeason();
+    }
+    
+    for (var i=1;i<=doc["authors"].length;i++) {
+        addAuthorP();
+        formvals.namedItem('firstname'+ i).value = doc["authors"][0];
+        formvals.namedItem('lastname'+i).value = doc["authors"][1];
+    }
+    
+
+    formvals.namedItem("title").value = doc['title'];
+    formvals.namedItem("month").value = doc['month'];
+    formvals.namedItem("day").value = doc['day'];
+    formvals.namedItem("year").value = doc['year'];
+    formvals.namedItem("link").value = doc['url'];
+    formvals.namedItem("publication").value = doc['publication'];
+  } else if (doc['type'] == 'treaty') {
+    dropdown.selectedIndex = 2;
+    selectDocType();
+    formvals = document.getElementById('treaty_form').elements;
+    formvals.namedItem("title").value = doc['title'];
+    formvals.namedItem("year").value = doc['year'];
+    formvals.namedItem("link").value = doc['url'];
+  } else if (doc['type'] == 'other') {
+    dropdown.selectedIndex = 3;
+    selectDocType();
+    formvals = document.getElementById('other_form').elements;
+    
+    for (var i=1;i<=doc["authors"].length;i++) {
+        addAuthorO();
+        formvals.namedItem('firstname'+ i).value = doc["authors"][0];
+        formvals.namedItem('lastname'+i).value = doc["authors"][1];
+    }
+    
+    formvals.namedItem("organization").value = doc['organization'];
+    formvals.namedItem("title").value = doc['title'];
+    formvals.namedItem("month").value = doc['month'];
+    formvals.namedItem("day").value = doc['day'];
+    formvals.namedItem("year").value = doc['year'];
+    formvals.namedItem("docid").value = doc['doc_number'];
+    formvals.namedItem("link").value = doc['url'];
+  }
+  
+}
+
+
+function unedit() {
+  document.getElementById("editbutton").value='Switch to edit mode';
+  document.getElementById("editbutton").onclick=edit;
+  document.getElementById("currentlyEditing").value="false";
+  update()
+}
 
 function update() {
-    var bibtext = 'Bibliography<br><br>'
-    for (var i=0; i < other_documents.length; i++) {
-        bibtext += other_documents[i]['text'] + '<br><br>';
+    if (document.getElementById('currentlyEditing')=="true"){
+      updateEdit();
+    } else {
+      var bibtext = 'Bibliography<br><br>'
+      for (var i=0; i < other_documents.length; i++) {
+          bibtext += other_documents[i]['text'] + '<br><br>';
+      }
+      bibtext += 'United Nations Documents:<br><br>';
+      for (var i=0; i<un_documents.length; i++) {
+          bibtext += un_documents[i]['text'] + '<br><br>';
+      }
+      document.getElementById('output').innerHTML = bibtext;
     }
-    bibtext += 'United Nations Documents:<br><br>';
-    for (var i=0; i<un_documents.length; i++) {
-        bibtext += un_documents[i]['text'] + '<br><br>';
-    }
-    document.getElementById('output').innerHTML = bibtext;
 }

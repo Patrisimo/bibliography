@@ -2,7 +2,7 @@
 <head>
 
 <script src='amun_biblio.js'></script>
-
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
 </head>
 <body>
 <h1>AMUN Bibliography Formatter</h1>
@@ -16,83 +16,89 @@
    </select></p>
 
 <div id='input'>
-    <div id='undoc'>
-        <h3>UN Document</h3>
-        <p>This format is intended for official United Nations documents; in particular, those with an official document number (starts with A/RES/ or similar)</p>
-        <form id='undoc_form'>
-            <table>
-            <tr>
-                <td>United Nations body: </td>
-                <td><input type='text' name='body'></td>
-            </tr>
-            <tr>
-                <td>Document title: </td>
-                <td><input type='text' name='title'></td>
-            </tr>
-            <tr>
-                <td>Date of passage:</td>
-                <td> <input type='text' name='month' placeholder='MM' size='2' maxlength='2'>
-                <input type='text' name='day' placeholder='DD' size='2' maxlength='2'> 
+  <div id='undoc'>
+      <h3>UN Document</h3>
+      <p>This format is intended for official United Nations documents; in particular, those with an official document number (starts with A/RES/ or similar)</p>
+      <form id='undoc_form'>
+          <table>
+          <tr>
+              <td>United Nations body: </td>
+              <td><input type='text' name='body'></td>
+          </tr>
+          <tr>
+              <td>Document title: </td>
+              <td><input type='text' name='title'></td>
+          </tr>
+          <tr id='date_u'>
+              <td>Year of passage:</td>
+              <td> 
+                <!-- <input type='text' name='month' placeholder='MM' size='2' maxlength='2'> -->
+                <!-- <input type='text' name='day' placeholder='DD' size='2' maxlength='2'>  -->
                 <input type='text' name='year' placeholder='YYYY' size='4' maxlength='4'> </td>
-            </tr>
-            <tr>
-                <td>Document number: </td>
-                <td><input type='text' name='docid'></td>
-            </tr>
-            <tr>
-                <td>Link to document:</td>
-                <td><input type='text' name='link'><br></td>
-            </tr>
-            <tr>
-                <td><input type='button' onclick='unDoc()' value='Store'></td>
-            </tr>
-            </table>
-        </form>
-    </div>
-    <div id='periodical' hidden='true'>
-        <h3>Periodical</h3>
-        <p>This format is intended for documents like news articles, both in print and online. In the "article source" section, please fill in any volume information in the second box, including volume, issue number and/or season, in the appropriate format. Include the 'p.' or 'pp.' in the page information.</p>
-        <form id='periodical_form'>
-            <table id='periodical_table'>
-            <div id='author_p'>
-            <tr>
-                <td>Author: </td>
-                <td><input type='text' name='firstname1' placeholder='First'>
-                    <input type='text' name='lastname1' placeholder='Last'>
-                </td>
-            </tr>
-            </div>
-            <tr>
-                <td><input type='button' value='Add Author' onclick='addAuthorP()'><td>
-            </tr>
-            <tr>
-                <td>Article title: </td>
-                <td><input type='text' name='title'></td>
-            </tr>
-            <tr>
-                <td>Article source: </td>
-                <td><input type='text' name='publication'>
-                    <input type='text' name='volinfo' placeholder='vol, etc.'></td>
-            <tr>
-                <td>Date of publication:</td>
-                <td> <input type='text' name='month' placeholder='MM' size='2' maxlength='2'>
-                <input type='text' name='day' placeholder='DD' size='2' maxlength='2'> 
-                <input type='text' name='year' placeholder='YYYY' size='4' maxlength='4'> </td>
-            </tr>
-            <tr>
-                <td>Page information: </td>
-                <td><input type='text' name='pages'></td>
-            </tr>
-            <tr>
-                <td>Link to article:</td>
-                <td><input type='text' name='link'><br></td>
-            </tr>
-            <tr>
-                <td><input type='button' onclick='periodical()' value='Store'></td>
-            </tr>
-            </table>
-        </form>
-    </div>   
+          </tr>
+          <!-- <tr> -->
+            <!-- <td><input type='button' value='Include Month/Day' onclick='addMonthDay()'></td> -->
+          <!-- </tr> -->
+          <tr>
+              <td>Document number: </td>
+              <td><input type='text' name='docid'></td>
+          </tr>
+          <tr>
+              <td>Link to document:</td>
+              <td><input type='text' name='link'><br></td>
+          </tr>
+          <tr>
+              <td><input type='button' onclick='unDoc()' value='Store'></td>
+          </tr>
+          </table>
+      </form>
+  </div>
+  <div id='periodical' hidden='true'>
+      <h3>Periodical</h3>
+      <p>This format is intended for documents like news articles, both in print and online.</p>
+      <form id='periodical_form'>
+          <table id='periodical_table'>
+          <div id='author_p'>
+          <tr>
+              <td>Author: </td>
+              <td><input type='text' name='firstname1' placeholder='First'>
+                  <input type='text' name='lastname1' placeholder='Last'>
+              </td>
+          </tr>
+          </div>
+          <tr>
+              <td><input type='button' value='Add Author' onclick='addAuthorP()'></td>
+          </tr>
+          <tr>
+              <td>Article title: </td>
+              <td><input type='text' name='title'></td>
+          </tr>
+          <tr>
+              <td>Article source: </td>
+              <td><input type='text' name='publication'>
+                  </td>
+          </tr>
+          <tr>
+              <td>Date of publication:</td>
+              <td id='date_p'> <input type='text' name='month' placeholder='MM' size='2' maxlength='2'>
+              <input type='text' name='day' placeholder='DD' size='2' maxlength='2'> 
+              <input type='text' name='year' placeholder='YYYY' size='4' maxlength='4'> </td>
+          </tr>
+          <tr>
+            <td>
+              <input type='button' value='Use season instead of date' onclick='switchSeasonP()' name='switch'>
+              <input type='hidden', value='false', name='season'>
+            </td>
+          <tr>
+              <td>Link to article:</td>
+              <td><input type='text' name='link'><br></td>
+          </tr>
+          <tr>
+              <td><input type='button' onclick='periodical()' value='Store'></td>
+          </tr>
+          </table>
+      </form>
+  </div>   
   <div id='treaty' hidden='true'>
         <h3>Conventions and Treaties</h3>
         <p>This format is intended for major conventions and treaties, for example the Treaty on the Non-Proliferation of Nuclear Weapons or the Convention on the Prevention and Punishment of Crimes against Internationally Protected Persons, including Diplomatic Agents. If you're not sure if a convention or treaty is "major" enough, don't hesitate to ask! (but it most likely is)</p>
@@ -116,51 +122,51 @@
             </table>
         </form>
     </div>            
-   <div id='other' hidden='true'>
-        <h3>Other documents</h3>
-        <p>This format is intended for documents that don't quite fit into one of the previous categories. Often these are informational web pages that are <i>not</i> periodicals. If there is no author listed, provide the organization that produced the web page. The distinction between organization and publisher is subtle, but only list a noun once between the two fields. </p>
-        <form id='other_form'>
-            <table id='other_table'>
-            <div id='author_o'>
-            <tr>
-                <td>Author: </td>
-                <td><input type='text' name='firstname1' placeholder='First'>
-                    <input type='text' name='lastname1' placeholder='Last'>
-                </td>
-            </tr>
-            </div>
-            <tr>
-                <td><input type='button' value='Add Author' onclick='addAuthorO()'><td>
-            </tr>
-            <tr>
-                <td>Organization (if no author):</td>
-                <td><input type='text' name='organization' placeholder='Organization'></td>
-            </tr>
-            <tr>
-                <td>Article title: </td>
-                <td><input type='text' name='title'></td>
-            </tr>
-            <tr>
-                <td>Publisher: </td>
-                <td><input type='text' name='publication'></td>
-            <tr>
-                <td>Date of publication:</td>
-                <td> <input type='text' name='month' placeholder='MM' size='2' maxlength='2'>
-                <input type='text' name='day' placeholder='DD' size='2' maxlength='2'> 
-                <input type='text' name='year' placeholder='YYYY' size='4' maxlength='4'> </td>
-            </tr>
-            <tr>
-                <td>Link to document:</td>
-                <td><input type='text' name='link'><br></td>
-            </tr>
-            <tr>
-                <td><input type='button' onclick='other()' value='Store'></td>
-            </tr>
-            </table>
-        </form>
-    </div>        
+  <div id='other' hidden='true'>
+      <h3>Books and Other documents</h3>
+      <p>This format is intended for books and documents that don't quite fit into one of the previous categories. Often these are informational web pages that are <i>not</i> periodicals. If there is no author listed, provide the organization that produced the web page. </p>
+      <form id='other_form'>
+          <table id='other_table'>
+          <div id='author_o'>
+          <tr>
+              <td>Author: </td>
+              <td><input type='text' name='firstname1' placeholder='First'>
+                  <input type='text' name='lastname1' placeholder='Last'>
+              </td>
+          </tr>
+          </div>
+          <tr>
+              <td><input type='button' value='Add Author' onclick='addAuthorO()'></td>
+          </tr>
+          <tr>
+              <td>Organization (if no author):</td>
+              <td><input type='text' name='organization' placeholder='Organization'></td>
+          </tr>
+          <tr>
+              <td>Book or Article title: </td>
+              <td><input type='text' name='title'></td>
+          </tr>
+          <tr>
+              <td>Date of publication:</td>
+              <td> <input type='text' name='month' placeholder='MM' size='2' maxlength='2'>
+              <input type='text' name='day' placeholder='DD' size='2' maxlength='2'> 
+              <input type='text' name='year' placeholder='YYYY' size='4' maxlength='4'> </td>
+          </tr>
+          <tr>
+              <td>Link to document:</td>
+              <td><input type='text' name='link'><br></td>
+          </tr>
+          <tr>
+              <td><input type='button' onclick='other()' value='Store'></td>
+          </tr>
+          </table>
+      </form>
+  </div>        
 </div>
 <p id='errors'></p>
+<p id='edit'>
+  <input type='button' value='Switch to edit mode' onclick='edit()' id='editbutton'></p>
+  <input type='hidden' value='false' id='currentlyEditing'>
 <p id='output'></p>
 
 </body>
