@@ -78,7 +78,7 @@ function unDoc() {
     }
     
     var bib_entry = [];
-    bib_entry['text'] = 'United Nations, ' + body + yearstring + (url.length > 0? '. <a href="' + url + '">':'') + title + (url.length >0?'</a>.':'.') + (doc_number.length > 0 ? ' ' + doc_number + "." : '');
+    bib_entry['text'] = 'United Nations, ' + body + yearstring + (url.length > 0? '. <a href="' + url + '">':'. ') + title + (url.length >0?'</a>.':'.') + (doc_number.length > 0 ? ' ' + doc_number + "." : '');
 
     bib_entry['body'] = body;
     bib_entry['year'] = year;
@@ -456,7 +456,7 @@ function validate_date(month, day, year) {
     }
     
     if (valid_month) {
-        datestring = day + (isNaN(day)?'':' ') + month + ' ';
+        datestring = day + ((isNaN(day) || d == '')?'':' ') + month + ' ';
     }
     
     if (year.length > 0) {
