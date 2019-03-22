@@ -456,7 +456,7 @@ function validate_date(month, day, year) {
     }
     
     if (valid_month) {
-        datestring = day + ((isNaN(day) || d == '')?'':' ') + month + ' ';
+        datestring = day + ((isNaN(day) || day == '')?'':' ') + month + ' ';
     }
     
     if (year.length > 0) {
