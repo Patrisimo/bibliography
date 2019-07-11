@@ -270,6 +270,7 @@ function other() {
     var year = formvals.namedItem('year').value;
     var url = formvals.namedItem('link').value;
     var organization = formvals.namedItem('organization').value;
+
     
     var authors = [];
     for (var i=1;i<=author_o;i++) {
@@ -303,8 +304,10 @@ function other() {
     error_msg += result['error_msg'];
     error_level = Math.max(error_level, result['error_level']);
     
-    var titlestring = '<a href="' + url + '">' + title + '</a>';
-    
+    titlestring = title
+    if (url.length > 0) {
+      titlestring = '<a href="' + url + '">' + title + '</a>';
+    }
     result = validate_authors(authors, organization); // make this
     autstring = result['autstring'];
     organization = result['titlestring'];
@@ -502,8 +505,11 @@ function validate_url(url) { // lol I'm not writing this
     var error_msg = '';
     var error_level = 0;
     if ( url.length === 0) {
-        error_msg = 'Warning: It is uncommon for there to be no URL.\n';
-        error_level = 1;
+        if (document.getElementById('nolinkok').value == "false") {
+          error_msg = 'Warning: It is uncommon for there to be no URL.\n';
+          error_level = 1;
+          document.getElementById('nolinkok').value = "true"
+        }
     }
     var result = [];
     result['url'] = url;
@@ -699,7 +705,6 @@ function editUN(i) {
 }
 
 function loadDoc(doc) {
-  alert('Called loadDoc('+doc)
   var dropdown = document.getElementById('bibtype');
   
   if (doc['type'] == 'un') {
