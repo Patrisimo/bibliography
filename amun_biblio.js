@@ -504,13 +504,7 @@ function validate_publication(publication, italicize) {
 function validate_url(url) { // lol I'm not writing this
     var error_msg = '';
     var error_level = 0;
-    if ( url.length === 0) {
-        if (document.getElementById('nolinkok').value == "false") {
-          error_msg = 'Warning: It is uncommon for there to be no URL.\n';
-          error_level = 1;
-          document.getElementById('nolinkok').value = "true"
-        }
-    }
+
     var result = [];
     result['url'] = url;
     result['error_msg'] = error_msg;
