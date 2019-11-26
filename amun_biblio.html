@@ -41,11 +41,13 @@
           <!-- </tr> -->
           <tr>
               <td>Document number: </td>
-              <td><input type='text' name='docid'></td>
+              <td><input type='text' name='docid' id="un_docid"></td>
+              <td><input type="button" onclick="autoID()" value="Fill"></td>
           </tr>
           <tr>
               <td>Link to document:</td>
-              <td><input type='text' name='link'><br></td>
+              <td><input type='text' name='link' id="un_link"><br></td>
+              <td><input type='button' onclick="autoLink()" value='Fill'></td>
           </tr>
           <tr>
               <td><input type='button' onclick='unDoc()' value='Store'></td>
@@ -71,7 +73,8 @@
           </tr>
           <tr>
               <td>Article title: </td>
-              <td><input type='text' name='title'></td>
+              <td><input type='text' name='title'>
+              <input type="checkbox" name="title_case" checked="true"> Convert to title case</td>
           </tr>
           <tr>
               <td>Article source: </td>
@@ -144,7 +147,8 @@
           </tr>
           <tr>
               <td>Book or Article title: </td>
-              <td><input type='text' name='title'></td>
+              <td><input type='text' name='title'>
+              <input type="checkbox" name="title_case" checked="true"> Title case</td>
           </tr>
           <tr>
               <td>Date of publication:</td>
@@ -156,6 +160,14 @@
               <td>Link to document:</td>
               <td><input type='text' name='link'><br></td>
           </tr>
+          <tr>
+            <td align="right"><input type="checkbox" name="italicize"></td>
+            <td> Source is a book or UN publication</td>
+          </tr>
+          <tr>
+<!--             <td align="right"><input type="checkbox" name="title_case" value="true"></td>
+            <td> Convert to title case</td> -->
+          </tr>          
           <tr>
               <td><input type='button' onclick='other()' value='Store'></td>
           </tr>
