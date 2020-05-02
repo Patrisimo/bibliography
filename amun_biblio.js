@@ -690,7 +690,7 @@ function title_case(text) {
         return text;
     }
     words[0] = capitalize(words[0]);
-    for (var i=0;i<words.length;i++) {
+    for (var i=1;i<words.length;i++) {
         if (stop_words.includes(words[i].toLowerCase())) {
             words[i] = words[i].toLowerCase();
         } else {
