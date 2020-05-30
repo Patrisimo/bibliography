@@ -88,12 +88,17 @@ function unDoc() {
 
     bib_entry['title'] = title;
     bib_entry['doc_number'] = doc_number;
-    bib_entry['url'] = url;
+    bib_entry['link'] = url ? url : '';
     bib_entry['type'] = 'un';
     
     
-    addUNDocument(bib_entry);
-    update();
+    if (! addUNDocument(bib_entry))
+        return;
+    if (document.getElementById("currentlyEditing").value) {
+        updateEdit()
+    } else {
+        update();
+    }
     resetAuthors();
     document.getElementById('undoc_form').reset()
 }
@@ -102,7 +107,7 @@ function periodical() {
     
     var formvals = document.getElementById('periodical_form').elements;
     var title = formvals.namedItem('title').value;
-    var month = formvals.namedItem('month').value; 
+    var month_num = formvals.namedItem('month').value; 
     var day = formvals.namedItem('day').value;
     var year = formvals.namedItem('year').value;
     var url = formvals.namedItem('link').value;
@@ -126,7 +131,7 @@ function periodical() {
         error_level = Math.max(error_level, 2);
     }
     // The month is not necessary, but must be between 1 and 12
-    var result = validate_date(month, day, year);
+    var result = validate_date(month_num, day, year);
     var yearstring = result['yearstring'];
     day = result['day'];
     month = result['month'];
@@ -189,24 +194,29 @@ function periodical() {
     }
     
     var bib_entry = {};
-    bib_entry['text'] = autstring + yearstring + (titlestring.length > 0? '. ':'') + titlestring + '.' + pubstring;
+    bib_entry['text'] = autstring + yearstring + (titlestring.length > 0? '. ':'') + titlestring + (".!?".includes(titlestring[titlestring.length-5])?'':'.') + pubstring;
 
     bib_entry['body'] = body;
-    bib_entry['day'] = day;
-    bib_entry['month'] = month;
-    bib_entry['year'] = year;
+    bib_entry['day'] = day ? day : '';
+    bib_entry['month'] = month_num ? month_num : '';
+    bib_entry['year'] = year? year : '';
     
     bib_entry['title'] = title;
-    bib_entry['link'] = url;
-    bib_entry['publication'] = publication;
+    bib_entry['link'] = url ? url : '';
+    bib_entry['publication'] = publication ? publication : '';
     bib_entry['isSeason'] = isSeason;
     bib_entry['type'] = 'periodical';
     bib_entry['authors'] = authors
     bib_entry['convertTitle'] = convertTitle;
     
-    
-    addNonUNDocument(bib_entry);
-    update();
+    console.log(bib_entry)
+    if (!addNonUNDocument(bib_entry))
+        return;
+    if (document.getElementById("currentlyEditing").value) {
+        updateEdit()
+    } else {
+        update();
+    }
     resetAuthors();
     resetSeason();
     document.getElementById('periodical_form').reset()
@@ -243,7 +253,7 @@ function treaty() {
     error_msg += result['error_msg'];
     error_level = Math.max(error_level, result['error_level']);
     
-    var titlestring = '<a href="' + url + '">' + title + '</a>';
+    var titlestring = '<a href="' + url + '">' + title.trim() + '</a>';
     
 
     
@@ -267,14 +277,19 @@ function treaty() {
     bib_entry['body'] = title;
     bib_entry['day'] = 1;
     bib_entry['month'] = 1;
-    bib_entry['year'] = year;
+    bib_entry['year'] = year ? year : '';
     
     bib_entry['title'] = title;
-    bib_entry['url'] = url;
+    bib_entry['link'] = url ? url : '';
     bib_entry['type'] = 'treaty'
     
-    addNonUNDocument(bib_entry);
-    update();
+    if (!addNonUNDocument(bib_entry))
+        return;
+    if (document.getElementById("currentlyEditing").value) {
+        updateEdit()
+    } else {
+        update();
+    }
     resetAuthors();
     document.getElementById('treaty_form').reset()
 }
@@ -283,7 +298,7 @@ function other() {
     
     var formvals = document.getElementById('other_form').elements;
     var title = formvals.namedItem('title').value;
-    var month = formvals.namedItem('month').value; 
+    var month_num = formvals.namedItem('month').value; 
     var day = formvals.namedItem('day').value;
     var year = formvals.namedItem('year').value;
     var url = formvals.namedItem('link').value;
@@ -308,7 +323,7 @@ function other() {
         error_level = Math.max(error_level, 2);
     }
     // The month is not necessary, but must be between 1 and 12
-    var result = validate_date(month, day, year);
+    var result = validate_date(month_num, day, year);
 
     var yearstring = result['yearstring'];
     day = result['day'];
@@ -325,9 +340,9 @@ function other() {
     error_level = Math.max(error_level, result['error_level']);
     
     if (convertTitle) {
-        titlestring = title_case(title);    
+        titlestring = title_case(title).trim();    
     } else {
-        titlestring = title
+        titlestring = title.trim()
     }
     
     if (italicize) {
@@ -360,22 +375,27 @@ function other() {
     }
     
     var bib_entry = {};
-    bib_entry['text'] = autstring + yearstring + (titlestring.length > 0? '. ':'') + titlestring + '.';
+    bib_entry['text'] = autstring + yearstring + (titlestring.length > 0? '. ':'') + titlestring + (".!?".includes(titlestring[titlestring.length-5])?'':'.');
 
     bib_entry['body'] = body;
-    bib_entry['day'] = day;
-    bib_entry['month'] = month;
-    bib_entry['year'] = year;
+    bib_entry['day'] = day ? day : '';
+    bib_entry['month'] = month_num ? month_num : '';
+    bib_entry['year'] = year ? year : '';
     bib_entry['authors'] = authors;
     bib_entry['organization'] = organization;
     bib_entry['type'] = 'other';
     bib_entry['title'] = title;
-    bib_entry['url'] = url;
+    bib_entry['link'] = url ? url : '';
     bib_entry['italicize'] = italicize;
     bib_entry['convertTitle'] = convertTitle;
     
-    addNonUNDocument(bib_entry);
-    update();
+    if (!addNonUNDocument(bib_entry))
+        return;
+    if (document.getElementById("currentlyEditing").value) {
+        updateEdit()
+    } else {
+        update();
+    }
     resetAuthors();
     document.getElementById('other_form').reset()
 }
@@ -634,24 +654,49 @@ function lessthan(one, other) {
 
 
 function addUNDocument(bib_entry) {
-    var i = 0;
-    for (i; i<un_documents.length; i++) {
-        if (lessthan(bib_entry, un_documents[i])) {
-            break;
+    console.log(bib_entry)
+    var i = -1;
+    var alerted = false;
+    for (var j=0; j<un_documents.length; j++) {
+        if (i<0 && lessthan(bib_entry, un_documents[j])) {
+            i=j;
+        }
+        // alert(un_documents[j]["link"] + "\n---\n" + bib_entry["link"])
+        if (bib_entry["link"] && un_documents[j]["link"] === bib_entry["link"] && !alerted) {
+            intended = confirm("Duplicate link with " + un_documents[j]["title"] + " (" + un_documents[j]["year"] +"); was this intended?");
+            alerted=true;
+            if (!intended) {
+                return false;
+            }
+
         }
     }
     un_documents.splice(i, 0, bib_entry);
-    
+    console.log(un_documents[i])
+    return true;
 }
 
 function addNonUNDocument(bib_entry) {
-    var i=0;
-    for (i; i<other_documents.length; i++) {
-        if (lessthan(bib_entry, other_documents[i])) {
-            break;
+    console.log(bib_entry)
+    var i = -1;
+    var alerted = false;
+    for (var j=0; j<other_documents.length; j++) {
+        if (i<0 && lessthan(bib_entry, other_documents[j])) {
+            i=j;
+        }
+        // alert(un_documents[j]["link"] + "\n---\n" + bib_entry["link"])
+        if (bib_entry["link"] && other_documents[j]["link"] === bib_entry["link"] && !alerted) {
+            intended = confirm("Duplicate link with " + other_documents[j]["title"] + "; was this intended?");
+            alerted=true;
+            if (!intended) {
+                return false;
+            }
+
         }
     }
+
     other_documents.splice(i, 0, bib_entry);
+    return true;
 }
 
 function addMonthDay() {
@@ -683,17 +728,20 @@ function autoID() {
 }
 
 var stop_words = 'a an the for and nor but or yet so as if above across after at around before behind below beside between by down during for from in inside onto of off on out through to under up with'.split(' ');
-
+var cap_words = 'UN ECOSOC US USA EU GA';
 function title_case(text) {
     var words = text.split(' ');
     if (words.length == 0) {
         return text;
     }
-    words[0] = capitalize(words[0]);
-    for (var i=1;i<words.length;i++) {
-        if (stop_words.includes(words[i].toLowerCase())) {
+    // words[0] = capitalize(words[0]);
+    for (var i=0;i<words.length;i++) {
+        if (i>0 && stop_words.includes(words[i].toLowerCase())) {
             words[i] = words[i].toLowerCase();
-        } else {
+        } else if (cap_words.includes(words[i].toUpperCase())) {
+            words[i] = words[i].toUpperCase();
+        } else if ((words[i].match(/[^a-zA-Z]/g)) == null) {
+            // if there are any nonalphabetic characters, leave it alone
             words[i] = capitalize(words[i]);
         }
     }
@@ -747,6 +795,8 @@ function updateEdit() {
       td = row.insertCell(1);
       td.innerHTML="<input type='button', value='Edit', onclick='editOther("+i+")'>"
       td = row.insertCell(2);
+      td.innerHTML="<input type='button', value='Copy', onclick='copyOther("+i+")'>"
+      td = row.insertCell(3);
       td.innerHTML=other_documents[i]['text']
   }
   document.getElementById('output').appendChild(bibTable)
@@ -759,6 +809,8 @@ function updateEdit() {
       td = row.insertCell(1);
       td.innerHTML="<input type='button', value='Edit', onclick='editUN("+i+")'>"
       td = row.insertCell(2);
+      td.innerHTML="<input type='button', value='Copy', onclick='copyUN("+i+")'>"
+      td = row.insertCell(3);      
       td.innerHTML=un_documents[i]['text']
   }
   document.getElementById('output').appendChild(bibTable)
@@ -785,6 +837,18 @@ function editUN(i) {
   updateEdit();
 }
 
+function copyOther(i) {
+  console.info("Copying " + i);
+  loadDoc(other_documents[i]);
+  updateEdit();
+}
+function copyUN(i) {
+  console.info('Called copyUN('+i)
+  loadDoc(un_documents[i]);
+  updateEdit();
+}
+
+
 function loadDoc(doc) {
   console.info("Loading " + JSON.stringify(doc));
   var dropdown = document.getElementById('bibtype');
@@ -794,11 +858,38 @@ function loadDoc(doc) {
     dropdown.selectedIndex = 0;
     selectDocType();
     formvals = document.getElementById('undoc_form').elements;
-    formvals.namedItem("body").value = doc['body'];
-    formvals.namedItem("title").value = doc['title'];
-    formvals.namedItem("year").value = doc['year'];
-    formvals.namedItem("docid").value = doc['doc_number'];
-    formvals.namedItem("link").value = doc['url'];
+    if (doc['body']) {
+        formvals.namedItem("body").value = doc['body'];
+    } else {
+        formvals.namedItem("body").value = '';
+    }
+    if (doc['title']) {
+        formvals.namedItem("title").value = doc['title'];
+    }
+    else{
+        formvals.namedItem("title").value = '';
+    }
+    if (doc['year']){
+        formvals.namedItem("year").value = doc['year'];
+    }
+    else {
+        formvals.namedItem("year").value = '';
+    }
+    if (doc['doc_number']) {
+        formvals.namedItem("docid").value = doc['doc_number'];
+    }
+    else {
+        formvals.namedItem("docid").value = '';
+    }
+    if (doc['link']) {
+        formvals.namedItem("link").value = doc['link'];
+    }
+    else
+        formvals.namedItem("link").value = '';
+    // formvals.namedItem("title").value = doc['title'];
+    // formvals.namedItem("year").value = doc['year'];
+    // formvals.namedItem("docid").value = doc['doc_number'];
+    // formvals.namedItem("link").value = doc['url'];
   } else if (doc['type'] == 'periodical') {
     dropdown.selectedIndex = 1;
     selectDocType();
@@ -811,9 +902,11 @@ function loadDoc(doc) {
     }
     
     for (var i=1;i<=doc["authors"].length;i++) {
-        addAuthorP();
-        formvals.namedItem('firstname'+ i).value = doc["authors"][0];
-        formvals.namedItem('lastname'+i).value = doc["authors"][1];
+        if (i>1) {
+            addAuthorP();
+        }
+        formvals.namedItem('firstname'+ i).value = doc["authors"][i-1][0];
+        formvals.namedItem('lastname'+i).value = doc["authors"][i-1][1];
     }
     
 
@@ -821,7 +914,7 @@ function loadDoc(doc) {
     formvals.namedItem("month").value = doc['month'];
     formvals.namedItem("day").value = doc['day'];
     formvals.namedItem("year").value = doc['year'];
-    formvals.namedItem("link").value = doc['url'];
+    formvals.namedItem("link").value = doc['link'];
     formvals.namedItem("publication").value = doc['publication'];
     formvals.namedItem("title_case").checked = doc['convertTitle'];
   } else if (doc['type'] == 'treaty') {
@@ -830,7 +923,7 @@ function loadDoc(doc) {
     formvals = document.getElementById('treaty_form').elements;
     formvals.namedItem("title").value = doc['title'];
     formvals.namedItem("year").value = doc['year'];
-    formvals.namedItem("link").value = doc['url'];
+    formvals.namedItem("link").value = doc['link'];
   } else if (doc['type'] == 'other') {
     dropdown.selectedIndex = 3;
     selectDocType();
@@ -850,7 +943,7 @@ function loadDoc(doc) {
     formvals.namedItem("month").value = doc['month'];
     formvals.namedItem("day").value = doc['day'];
     formvals.namedItem("year").value = doc['year'];
-    formvals.namedItem("link").value = doc['url'];
+    formvals.namedItem("link").value = doc['link'];
     formvals.namedItem("italicize").checked = doc['italicize'];
     formvals.namedItem("title_case").checked = doc['convertTitle'];
   } else {
@@ -863,7 +956,7 @@ function loadDoc(doc) {
 function unedit() {
   document.getElementById("editbutton").value='Switch to edit mode';
   document.getElementById("editbutton").onclick=edit;
-  document.getElementById("currentlyEditing").value="false";
+  document.getElementById("currentlyEditing").value="";
   update()
 }
 
