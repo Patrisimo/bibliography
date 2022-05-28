@@ -81,7 +81,7 @@ function unDoc() {
     }
     
     var bib_entry = {};
-    bib_entry['text'] = 'United Nations, ' + body + yearstring + (url.length > 0? '. <a href="' + url + '">':'. ') + title + (url.length >0?'</a>.':'.') + (doc_number.length > 0 ? ' ' + doc_number + "." : '');
+    bib_entry['text'] = 'United Nations, ' + body + yearstring + (url.length > 0? '. <a href="' + url + '"  target="_blank" rel="noopener noreferrer" >':'. ') + title + (url.length >0?'</a>.':'.') + (doc_number.length > 0 ? ' ' + doc_number + "." : '');
 
     bib_entry['body'] = body;
     bib_entry['year'] = year;
@@ -159,7 +159,7 @@ function periodical() {
     }
     
     if (url.length > 0) {
-      titlestring = '<a href="' + url + '">' + titlestring + '</a>';
+      titlestring = '<a href="' + url + '"  target="_blank" rel="noopener noreferrer" >' + titlestring + '</a>';
     } else {
       titlestring = titlestring;
     }
@@ -253,7 +253,7 @@ function treaty() {
     error_msg += result['error_msg'];
     error_level = Math.max(error_level, result['error_level']);
     
-    var titlestring = '<a href="' + url + '">' + title.trim() + '</a>';
+    var titlestring = '<a href="' + url + '"  target="_blank" rel="noopener noreferrer" >' + title.trim() + '</a>';
     
 
     
@@ -349,7 +349,7 @@ function other() {
         titlestring = "<i>" + titlestring + "</i>";
     }
     if (url.length > 0) {
-      titlestring = '<a href="' + url + '">' + titlestring + '</a>';
+      titlestring = '<a href="' + url + '"  target="_blank" rel="noopener noreferrer" >' + titlestring + '</a>';
     }
     result = validate_authors(authors, organization); // make this
     autstring = result['autstring'];
@@ -629,9 +629,9 @@ function resetAuthors() {
 
 
 function lessthan(one, other) {
-    if (one['body'] < other['body']) {
+    if (one['body'].toLowerCase() < other['body'].toLowerCase()) {
             return true;
-    } else if (one['body'] === other['body']) {
+    } else if (one['body'].toLowerCase() === other['body'].toLowerCase()) {
         if (one['year'] > other['year']) {
             return true;
         } else if (one['year'] === other['year']) {
@@ -641,7 +641,7 @@ function lessthan(one, other) {
                 if (one['day'] > other['day']) {
                     return true;
                 } else if (one['day'] > other['day']) {
-                    if (one['text'] < other['text']) {
+                    if (one['text'].toLowerCase() < other['text'].toLowerCase()) {
                         return true;
                     }
                 }
@@ -708,7 +708,7 @@ function autoLink() {
     var id_field = document.getElementById('un_docid');
     var link_field = document.getElementById('un_link');
     if (link_field.value.length == 0 || confirm("Overwrite link?")) {
-            link_field.value = "https://undocs.org/" + id_field.value;
+            link_field.value = "https://undocs.org/en/" + id_field.value;
     } 
     
 }
@@ -719,7 +719,7 @@ function autoID() {
     var link_field = document.getElementById('un_link');
     if (/undocs.org\//.test(link_field.value)) {
         if (id_field.value.length == 0 || confirm("Overwrite document ID?")) {
-            id_field.value = link_field.value.match(/undocs.org\/(.*)/)[1];
+            id_field.value = link_field.value.match(/undocs.org\/(?:en\/)?(.*)/)[1];
         }
     } else {
         alert("Unable to read document ID from URL. Please use a undocs.org URL.");
@@ -735,11 +735,15 @@ function title_case(text) {
         return text;
     }
     // words[0] = capitalize(words[0]);
+    isAllCaps = (text === text.toUpperCase())
     for (var i=0;i<words.length;i++) {
         if (i>0 && stop_words.includes(words[i].toLowerCase())) {
             words[i] = words[i].toLowerCase();
         } else if (cap_words.includes(words[i].toUpperCase())) {
             words[i] = words[i].toUpperCase();
+        } else if (words[i] === words[i].toUpperCase() && !isAllCaps) {
+            // if the title is not in all caps and a word *is* in all caps, keep it allcapsed
+            words[i] = words[i]
         } else if ((words[i].match(/[^a-zA-Z]/g)) == null) {
             // if there are any nonalphabetic characters, leave it alone
             words[i] = capitalize(words[i]);
