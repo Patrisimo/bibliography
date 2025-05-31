@@ -708,7 +708,7 @@ function autoLink() {
     var id_field = document.getElementById('un_docid');
     var link_field = document.getElementById('un_link');
     if (link_field.value.length == 0 || confirm("Overwrite link?")) {
-            link_field.value = "https://undocs.org/en/" + id_field.value;
+            link_field.value = "https://docs.un.org/en/" + id_field.value;
     } 
     
 }
@@ -717,12 +717,12 @@ function autoLink() {
 function autoID() {
     var id_field = document.getElementById('un_docid');
     var link_field = document.getElementById('un_link');
-    if (/undocs.org\//.test(link_field.value)) {
+    if (/docs.un.org\//.test(link_field.value)) {
         if (id_field.value.length == 0 || confirm("Overwrite document ID?")) {
-            id_field.value = link_field.value.match(/undocs.org\/(?:en\/)?(.*)/)[1];
+            id_field.value = link_field.value.match(/docs.un.org\/(?:en\/)?(.*)/)[1];
         }
     } else {
-        alert("Unable to read document ID from URL. Please use a undocs.org URL.");
+        alert("Unable to read document ID from URL. Please use a docs.un.org URL.");
     }
     
 }
@@ -744,8 +744,8 @@ function title_case(text) {
         } else if (words[i] === words[i].toUpperCase() && !isAllCaps) {
             // if the title is not in all caps and a word *is* in all caps, keep it allcapsed
             words[i] = words[i]
-        } else if ((words[i].match(/[^a-zA-Z]/g)) == null) {
-            // if there are any nonalphabetic characters, leave it alone
+        } else if ((words[i].match(/^[a-zA-Z]+.?/g)) != null) {
+            // if there are any nonalphabetic characters (except for the last), leave it alone
             words[i] = capitalize(words[i]);
         }
     }
